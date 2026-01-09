@@ -461,7 +461,7 @@ defmodule Anubis.Client.Base do
       ref = %{"type" => "ref/prompt", "name" => "code_review"}
       argument = %{"name" => "language", "value" => "py"}
       {:ok, response} = Anubis.Client.complete(client, ref, argument)
-      
+
       # Access the completion values
       values = get_in(Response.unwrap(response), ["completion", "values"])
   """
@@ -738,14 +738,14 @@ defmodule Anubis.Client.Base do
 
       MyClient.register_sampling_callback(fn params ->
         messages = params["messages"]
-        
+
         # Show UI for user approval
         case MyUI.approve_sampling(messages) do
           {:approved, edited_messages} ->
             # Call LLM with approved/edited messages
             response = MyLLM.generate(edited_messages, params["modelPreferences"])
             {:ok, response}
-            
+
           :rejected ->
             {:error, "User rejected sampling request"}
         end
@@ -998,6 +998,10 @@ defmodule Anubis.Client.Base do
   end
 
   @impl true
+  def handle_cast({:response, <<>>}, state) do
+    Logging.client_event("empty_response", %{}, level: :info)
+    {:noreply, state}
+  end
   def handle_cast({:response, response_data}, state) do
     case Message.decode(response_data) do
       {:ok, [message]} ->
