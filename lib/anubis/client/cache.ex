@@ -89,7 +89,7 @@ defmodule Anubis.Client.Cache do
   defp ensure_table(table) when is_atom(table) do
     case :ets.whereis(table) do
       :undefined ->
-        :ets.new(table, [:named_table, :private, :set, read_concurrency: true])
+        :ets.new(table, [:named_table, :public, :set, read_concurrency: true])
         :ok
 
       _ ->
